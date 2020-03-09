@@ -1,17 +1,19 @@
-#include "pch.h"
 #include "philosopher.h"
 
 
 
-
+void philosopher::execute(){
+	dine();
+}
 
 void philosopher::think()
 {
 	int thinking_time = rand() % 1000 + 1500;
 
-	std::cout << "Filozof nr " << this->id << " zaczal myslec" << std::endl;
+	status = "mysli";
+	//std::cout << "Filozof nr " << this->id << " zaczal myslec" << std::endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(thinking_time));
-	std::cout << "Filozof nr " << this->id << " skonczyl myslec" << std::endl;
+	//std::cout << "Filozof nr " << this->id << " skonczyl myslec" << std::endl;
 }
 
 void philosopher::eat()
@@ -29,13 +31,15 @@ void philosopher::eat()
 
 	std::unique_lock<std::mutex> l1(first->availability, std::defer_lock);
 	std::unique_lock<std::mutex> l2(second->availability, std::defer_lock);
-
+	
+	status = "czeka";
+	
 	std::lock(l1, l2);
 	
-	std::cout << "Filozof nr " << this->id << " zaczal jesc" << std::endl;
+	status = "je   ";
+	//std::cout << "Filozof nr " << this->id << " zaczal jesc" << std::endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(eating_time));
-	std::cout << "Filozof nr " << this->id << " skonczyl jesc" << std::endl;
-
+	//std::cout << "Filozof nr " << this->id << " skonczyl jesc" << std::endl;
 }
 
 philosopher::philosopher(int id, std::shared_ptr<fork> left, std::shared_ptr<fork> right)
