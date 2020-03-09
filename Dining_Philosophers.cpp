@@ -6,41 +6,45 @@
 #include <thread>
 #include <ncurses.h>
 
-	void visualise();
+	void visualise(std::vector<std::shared_ptr<philosopher>> philos);
 	
-	
-	
-	auto f1 = std::make_shared<fork>(1);
-	auto f2 = std::make_shared<fork>(2);
-	auto f3 = std::make_shared<fork>(3);
-
-
-	philosopher p1(1, f1, f2);
-	philosopher p2(2, f2, f3);
-	philosopher p3(3, f3, f1);
-
-
-
 
 int main()
 {
-	
-	std::thread t1(&philosopher::execute, &p1);
-	std::thread t2(&philosopher::execute, &p2);
-	std::thread t3(&philosopher::execute, &p3);
-	
-	std::thread visualise_thread(&visualise);
+	int N = 5;
 
-	t1.join();
-	t2.join();
-	t3.join();
+	std::vector<std::shared_ptr<fork>> forks;
+	std::vector<std::shared_ptr<philosopher>> philos;
+	std::vector<std::thread> threads;
+
+	for(int i = 0; i < N; i++){
+		auto f = std::make_shared<fork>();
+		forks.push_back(f);
+	}
+
+	for(int i = 0; i < N; i++){
+		auto philo = std::make_shared<philosopher>(i,forks[i],forks[(i+1)%N]);
+		philos.push_back(philo);
+	}
+
+	for(int i = 0;i < N;i++){
+		threads.push_back(std::thread(&philosopher::execute, philos[i]));
+	}
+
+	std::thread visualise_thread(&visualise, philos);
+
+	for(int i = 0; i < N; i++){
+		threads[i].join();
+	}
+
 	visualise_thread.join();
   
 
 }
 
-void visualise()
+void visualise(std::vector<std::shared_ptr<philosopher>> philos)
 {
+	int N = philos.size();
 	initscr();
 	move(0,15);
 	printw("Stan");
@@ -49,24 +53,22 @@ void visualise()
 	move(0,25);
 	printw("Czas");
 
-	move(1,0);
-	printw("Filozof nr 1 ");
-	move(2,0);
-	printw("Filozof nr 2 ");
-	move(3,0);
-	printw("Filozof nr 3 ");
+	for(int i = 0; i < N; i++){
+			move(i+1, 0);
+			printw("Filozof nr ");
+			printw(std::to_string(i+1).c_str());
+		}
+	
 	while(true){
 		
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		move(1,15);
-		printw(p1.status.c_str());
-		refresh();
-		move(2,15);
-		printw(p2.status.c_str());
-		refresh();
-		move(3,15);
-		printw(p3.status.c_str());
-		refresh();
+
+		for(int i = 0; i < N; i++){
+			move(i+1,15);
+			printw(philos[i]->status.c_str());
+			refresh();
+		}
+
 	}
     endwin();
 	

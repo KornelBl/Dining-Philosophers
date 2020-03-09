@@ -9,8 +9,7 @@ class philosopher
 {
 	int id;
 
-	//first,second instead of left, right to avoid deadlock, a fork with higher id number will be taken assign as first
-	std::shared_ptr<fork> first, second;
+	std::shared_ptr<fork> right, left;
 	void think();
 	void eat();
 
